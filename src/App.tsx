@@ -1,34 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { Route, Routes, useNavigate } from 'react-router-dom'
+import ConnectForm from './components/ConnectForm'
+
+import AgoraRTC, {
+  AgoraRTCProvider,
+  useRTCClient,
+} from "agora-rtc-react";
+import LiveVideo from './components/LiveVideo';
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const navigate = useNavigate()
+  const agoraClient = useRTCClient(AgoraRTC.createClient({ codec: "vp8", mode: "rtc" })); // Initialize Agora Client
+
+  const handleConnect = (channelName: string) => {
+    navigate(`/via/${channelName}`) // on form submit, navigate to new route
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Routes>
+      <Route path='/' element={<ConnectForm connectToVideo={handleConnect} />} />
+      <Route path='/via/:channelName' element={
+        <AgoraRTCProvider client={agoraClient}>
+          <LiveVideo />
+        </AgoraRTCProvider>
+      } />
+    </Routes>
   )
 }
 
